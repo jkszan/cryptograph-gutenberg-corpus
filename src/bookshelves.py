@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """Functions to download, parse and filter Gutenberg's bookshelves."""
 
@@ -5,7 +6,7 @@ import os
 import glob
 import numpy as np
 import pandas as pd
-import lxml.html
+from lxml import html
 import subprocess
 
 
