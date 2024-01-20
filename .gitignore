@@ -1,6 +1,10 @@
 # data and metadata folder and all subfolders and files recursive
-data/**/*
+data/.mirror/*
+data/text/*
+data/counts/*
+data/raw/*
 metadata/**/*
+!data/ngram/
 
 # metadata raw file
 #metadata/rdf-files.tar.bz2

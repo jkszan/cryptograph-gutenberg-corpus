@@ -23,104 +23,194 @@ from collections import defaultdict
 # TODO: For unspaced variant just do spaced on a book text that has removed spaces from it
 # Num books (initial): 2343
 
-def generateNgramStatistics(PG_Number, 
-                            path_to_text_file=None,
-                            path_to_counts_dir=None,
-                            ):
+def generateNgramCounts(PG_Number, 
+                        path_to_text_file=None,
+                        path_to_counts_dir=None,
+                        ):
     
     with open(path_to_text_file, "r", encoding="UTF-8") as file:
         text = file.read()
 
 
-    unigramCounts = defaultdict(lambda: 0)
+    ngramCounts = defaultdict(lambda: 0)
     unigramTotal = 0
-
-    bigramCounts = defaultdict(lambda: 0)
     bigramTotal = 0
 
     # Statistics for bigrams of the form " x"
-    bigramSpaceOne = defaultdict(lambda: 0)
     bigramSpaceOneTotal = 0
 
     # Statistics for bigrams of the form "x "
-    bigramSpaceTwo = defaultdict(lambda: 0)
     bigramSpaceTwoTotal = 0
 
     # Statistics for trigrams without spaces
-    trigramCount = defaultdict(lambda: 0)
     trigramTotal = 0
 
     # Statistics for trigrams of the form " xx"
-    trigramSpaceOne = defaultdict(lambda: 0)
     trigramSpaceOneTotal = 0
 
     # Statistics for trigrams of the form "x x"
-    trigramSpaceTwo = defaultdict(lambda: 0)
     trigramSpaceTwoTotal = 0
     
     # Statistics for trigrams of the form "xx "
-    trigramSpaceThree = defaultdict(lambda: 0)
     trigramSpaceThreeTotal = 0
 
     # Statistics for trigrams of the form " x "
-    trigramSpaceOneThree = defaultdict(lambda: 0)
     trigramSpaceOneThreeTotal = 0
 
     for i in range(len(text)):
 
         if text[i] != " ":
-            unigramCounts[text[i]] += 1
+            ngramCounts[text[i]] += 1
             unigramTotal += 1
 
         if i > 0:
             bigram = text[i-1:i+1]
+            ngramCounts[bigram] += 1
 
             if bigram[0] == " ":
-                bigramSpaceOne[bigram] += 1
                 bigramSpaceOneTotal += 1
 
             elif bigram[1] == " ":
-                bigramSpaceTwo[bigram] += 1
                 bigramSpaceTwoTotal += 1
+
             else:
-                bigramCounts[bigram] += 1
                 bigramTotal += 1
         
         if i > 1:
             trigram = text[i-2: i+1]
+            ngramCounts[trigram] += 1
 
             if trigram[1] == " ":
-                trigramSpaceTwo[trigram] += 1
                 trigramSpaceTwoTotal += 1
 
             elif trigram[0] == " " and trigram[2] == " ":
-                trigramSpaceOneThree[trigram] += 1
                 trigramSpaceOneThreeTotal += 1
 
             elif trigram[0] == " ":
-                trigramSpaceOne[trigram] += 1
                 trigramSpaceOneTotal += 1
 
             elif trigram[2] == " ":
-                trigramSpaceThree[trigram] += 1
                 trigramSpaceThreeTotal += 1
 
             else:
-                trigramCount[trigram] += 1
                 trigramTotal += 1
 
-    ngramData = {"x": (unigramCounts, unigramTotal),
-                 "xx": (bigramCounts, bigramTotal),
-                 " x": (bigramSpaceOne, bigramSpaceOneTotal),
-                 "x ": (bigramSpaceTwo, bigramSpaceTwoTotal),
-                 "xxx": (trigramCount, trigramTotal),
-                 " xx": (trigramSpaceOne, trigramSpaceOneTotal),
-                 "x x": (trigramSpaceTwo, trigramSpaceTwoTotal),
-                 "xx ": (trigramSpaceThree, trigramSpaceThreeTotal),
-                 " x ": (trigramSpaceOneThree, trigramSpaceOneThreeTotal)}
+    ngramData = {"Counts": ngramCounts,
+                 "unigramTotal": unigramTotal,
+                 "bigramTotal": bigramTotal,
+                 "bigramSpaceOneTotal": bigramSpaceOneTotal,
+                 "bigramSpaceTwoTotal": bigramSpaceTwoTotal,
+                 "trigramTotal": trigramTotal,
+                 "trigramSpaceOneTotal": trigramSpaceOneTotal,
+                 "trigramSpaceTwoTotal": trigramSpaceTwoTotal,
+                 "trigramSpaceThreeTotal": trigramSpaceThreeTotal,
+                 "trigramSpaceOneThreeTotal": trigramSpaceOneThreeTotal
+                 }
+
     # write text file
     target_file = os.path.join(path_to_counts_dir,"PG%s_counts.json"%PG_Number)
     with io.open(target_file,"w", encoding="UTF-8") as f:
         json.dump(ngramData, f, indent=4)
 
-generateNgramStatistics(34, path_to_text_file="./data/text/PG34_text.txt", path_to_counts_dir="./data/counts/")
+
+def aggregateCounts(path_to_counts_dir="data/counts/", path_to_ngram_dir="data/ngram/"):
+
+    aggregateCounts = defaultdict(lambda: 0)
+    unigramTotal = 0
+    bigramTotal = 0
+
+    # Statistics for bigrams of the form " x"
+    bigramSpaceOneTotal = 0
+
+    # Statistics for bigrams of the form "x "
+    bigramSpaceTwoTotal = 0
+
+    # Statistics for trigrams without spaces
+    trigramTotal = 0
+
+    # Statistics for trigrams of the form " xx"
+    trigramSpaceOneTotal = 0
+
+    # Statistics for trigrams of the form "x x"
+    trigramSpaceTwoTotal = 0
+    
+    # Statistics for trigrams of the form "xx "
+    trigramSpaceThreeTotal = 0
+
+    # Statistics for trigrams of the form " x "
+    trigramSpaceOneThreeTotal = 0
+
+
+    for file in os.listdir(path_to_counts_dir):
+        if file.endswith(".json"):
+            with io.open(path_to_counts_dir+file,"r") as countFile:
+                countJSON = json.load(countFile)
+
+            for ngram, count in countJSON["Counts"].items():
+                aggregateCounts[ngram] += count
+            
+            unigramTotal += countJSON["unigramTotal"]
+            bigramTotal += countJSON["bigramTotal"]
+            trigramTotal += countJSON["trigramTotal"]
+            bigramSpaceOneTotal += countJSON["bigramSpaceOneTotal"]
+            bigramSpaceTwoTotal += countJSON["bigramSpaceTwoTotal"]
+            trigramSpaceOneTotal += countJSON["trigramSpaceOneTotal"]
+            trigramSpaceTwoTotal += countJSON["trigramSpaceTwoTotal"]
+            trigramSpaceThreeTotal += countJSON["trigramSpaceThreeTotal"]
+            trigramSpaceOneThreeTotal += countJSON["trigramSpaceOneThreeTotal"]
+    
+    ngramData = {"Counts": aggregateCounts,
+                "unigramTotal": unigramTotal,
+                "bigramTotal": bigramTotal,
+                "bigramSpaceOneTotal": bigramSpaceOneTotal,
+                "bigramSpaceTwoTotal": bigramSpaceTwoTotal,
+                "trigramTotal": trigramTotal,
+                "trigramSpaceOneTotal": trigramSpaceOneTotal,
+                "trigramSpaceTwoTotal": trigramSpaceTwoTotal,
+                "trigramSpaceThreeTotal": trigramSpaceThreeTotal,
+                "trigramSpaceOneThreeTotal": trigramSpaceOneThreeTotal
+                }
+
+    # write counts file
+    target_file = os.path.join(path_to_ngram_dir,"aggregate_ngram_counts.json")
+    with io.open(target_file,"w", encoding="UTF-8") as f:
+        json.dump(ngramData, f, indent=4)
+    
+    ngramProbability = {}
+    for ngram, count in aggregateCounts.items():
+
+        if len(ngram) == 1:
+            ngramProbability[ngram] = count/unigramTotal
+
+        if len(ngram) == 2:
+
+            if ngram[0] == " ":
+                ngramProbability[ngram] = count/bigramSpaceOneTotal
+
+            elif ngram[1] == " ":
+                ngramProbability[ngram] = count/bigramSpaceTwoTotal
+
+            else:
+                ngramProbability[ngram] = count/bigramTotal
+        
+        if len(ngram) == 3:
+
+            if ngram[1] == " ":
+                ngramProbability[ngram] = count/trigramSpaceTwoTotal
+
+            elif ngram[0] == " " and ngram[2] == " ":
+                ngramProbability[ngram] = count/trigramSpaceOneThreeTotal
+
+            elif ngram[0] == " ":
+                ngramProbability[ngram] = count/trigramSpaceOneTotal
+
+            elif ngram[2] == " ":
+                ngramProbability[ngram] = count/trigramSpaceThreeTotal
+
+            else:
+                ngramProbability[ngram] = count/trigramTotal
+
+    # write probability file
+    target_file = os.path.join(path_to_ngram_dir,"aggregate_ngram_probabilities.json")
+    with io.open(target_file,"w", encoding="UTF-8") as f:
+        json.dump(ngramProbability, f, indent=4)
