@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from .cleanup import strip_headers
-from .tokenizer import tokenize_text
+from .formatter import format_text
 from collections import Counter
 import io
 import os
@@ -10,8 +10,8 @@ def process_book(
 	text_dir=None,
 	tokens_dir=None,
 	counts_dir=None,
-	tokenize_f=tokenize_text,
 	cleanup_f=strip_headers,
+    format_f=format_text,
     overwrite_all=False,
     language="english",
     log_file=""
@@ -43,30 +43,24 @@ def process_book(
     if text_dir is None:
         raise ValueError("You must specify a path to save the text files.")
         
-    if tokens_dir is None:
-        raise ValueError("You must specify a path to save the tokens files.")
-        
-    if counts_dir is None:
-        raise ValueError("You must specify a path to save the counts files.")
-        
     if path_to_raw_file is None:
         raise ValueError("You must specify a path to the raw file to process.")
-   
+
     # get PG number
     PG_number = path_to_raw_file.split("/")[-1].split("_")[0][2:]
 
     if overwrite_all or\
         (not os.path.isfile(os.path.join(text_dir,"PG%s_text.txt"%PG_number))) or \
-        (not os.path.isfile(os.path.join(tokens_dir,"PG%s_tokens.txt"%PG_number))) or \
         (not os.path.isfile(os.path.join(counts_dir,"PG%s_counts.txt"%PG_number))):
         # read raw file
-        with io.open(path_to_raw_file, encoding="UTF-8") as f:
+        with io.open(path_to_raw_file, encoding="latin-1") as f:
             text = f.read()
 
         # clean it up
         clean = cleanup_f(text)
+        formatted = format_f(clean)
 
         # write text file
         target_file = os.path.join(text_dir,"PG%s_text.txt"%PG_number)
         with io.open(target_file,"w", encoding="UTF-8") as f:
-            f.write(clean)
+            f.write(formatted)
