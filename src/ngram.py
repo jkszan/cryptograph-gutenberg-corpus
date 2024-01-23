@@ -11,8 +11,6 @@ from collections import defaultdict
 # TODO: Make unigram, bigram, trigram, quadgram, and quintagram letter stats
 # TODO: Have a version of these letter stats that includes spaces and a version that ignores them
 # TODO: Have the program also do word counts and organize them by frequency
-# TODO: List counts of ngrams / words alongside total ngrams / words so that we can combine the stats of many books together to make our
-# overall stats
 
 # TODO: For heuristic search (genetic algo), have mutation letters be selected with probability proportional to loss function of the characters
 # TODO: Loss function of the characters can be deviation from unigram frequency plus deviation from bigram and trigram frequency for which the char is a part of
@@ -23,14 +21,36 @@ from collections import defaultdict
 # TODO: For unspaced variant just do spaced on a book text that has removed spaces from it
 # Num books (initial): 2343
 
-def generateNgramCounts(PG_Number, 
-                        path_to_text_file=None,
+def generateAllNgramCounts(path_to_text_dir="./data/text/", path_to_counts_dir="./data/counts/", spacesRemoved=False):
+    processedCounts = 0
+
+    if spacesRemoved:
+        path_to_counts_dir += "spaceless/"
+    else:
+        path_to_counts_dir += "spaced/"
+
+    for file in os.listdir(path_to_text_dir):
+        if file.endswith(".txt"):
+            path_to_text_file = path_to_text_dir + file
+            PG_Number = int(path_to_text_file.split("/")[-1].split("_")[0][2:])
+
+                
+            with open(path_to_text_file, "r", encoding="UTF-8") as file:
+                text = file.read()
+
+            if spacesRemoved:
+                text = text.replace(" ", "")
+
+            generateNgramCount(PG_Number, text, path_to_counts_dir)
+
+            processedCounts += 1
+            print("Processed %d counts..." % processedCounts, end="\r")
+    print("Successfully finished processing counts!")
+
+def generateNgramCount(PG_Number,
+                        text,
                         path_to_counts_dir=None,
                         ):
-    
-    with open(path_to_text_file, "r", encoding="UTF-8") as file:
-        text = file.read()
-
 
     ngramCounts = defaultdict(lambda: 0)
     unigramTotal = 0
@@ -113,7 +133,7 @@ def generateNgramCounts(PG_Number,
         json.dump(ngramData, f, indent=4)
 
 
-def aggregateCounts(path_to_counts_dir="data/counts/", path_to_ngram_dir="data/ngram/"):
+def aggregateCounts(path_to_counts_dir="data/counts/", path_to_ngram_dir="data/ngram/", spacesRemoved=False):
 
     aggregateCounts = defaultdict(lambda: 0)
     unigramTotal = 0
@@ -140,6 +160,10 @@ def aggregateCounts(path_to_counts_dir="data/counts/", path_to_ngram_dir="data/n
     # Statistics for trigrams of the form " x "
     trigramSpaceOneThreeTotal = 0
 
+    if spacesRemoved:
+        path_to_counts_dir += "spaceless/"
+    else:
+        path_to_counts_dir += "spaced/"
 
     for file in os.listdir(path_to_counts_dir):
         if file.endswith(".json"):
@@ -171,7 +195,12 @@ def aggregateCounts(path_to_counts_dir="data/counts/", path_to_ngram_dir="data/n
                 "trigramSpaceOneThreeTotal": trigramSpaceOneThreeTotal
                 }
 
-    # write counts file
+    if spacesRemoved:
+        path_to_ngram_dir += "spaceless/"
+    else:
+        path_to_ngram_dir += "spaced/"
+
+    # write ngram counts file
     target_file = os.path.join(path_to_ngram_dir,"aggregate_ngram_counts.json")
     with io.open(target_file,"w", encoding="UTF-8") as f:
         json.dump(ngramData, f, indent=4)
@@ -210,7 +239,8 @@ def aggregateCounts(path_to_counts_dir="data/counts/", path_to_ngram_dir="data/n
             else:
                 ngramProbability[ngram] = count/trigramTotal
 
-    # write probability file
+    # write ngram probability file
     target_file = os.path.join(path_to_ngram_dir,"aggregate_ngram_probabilities.json")
     with io.open(target_file,"w", encoding="UTF-8") as f:
         json.dump(ngramProbability, f, indent=4)
+    print("Successfully created probability file at", path_to_ngram_dir + "aggregate_ngram_probabilities.json")
