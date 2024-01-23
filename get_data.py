@@ -105,7 +105,7 @@ if __name__ == '__main__':
                "--exclude", "*",
                "aleph.gutenberg.org::gutenberg", args.mirror
                ]
-    #subprocess.call(sp_args)
+    subprocess.call(sp_args)
 
     # Get rid of duplicates
     # ---------------------
@@ -113,7 +113,7 @@ if __name__ == '__main__':
     # once in PG's site. We keep the newest one, see
     # erase_duplicates_in_mirror docstring.
     print("!")
-    dups_list = []#list_duplicates_in_mirror(mirror_dir=args.mirror)
+    dups_list = list_duplicates_in_mirror(mirror_dir=args.mirror)
     print("!!")
     # Populate raw from mirror
     # ------------------------
