@@ -133,3 +133,4 @@ if __name__ == '__main__':
         except Exception as e:
             if not args.quiet:
                 print("# WARNING: cannot process '%s' (unkown error)" % filename)
+# TODO: Create file analagous to this that combines the functions of getBookSubset.py and generateStatistics.py

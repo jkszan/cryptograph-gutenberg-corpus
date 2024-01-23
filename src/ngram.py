@@ -45,7 +45,7 @@ def generateAllNgramCounts(path_to_text_dir="./data/text/", path_to_counts_dir="
 
             processedCounts += 1
             print("Processed %d counts..." % processedCounts, end="\r")
-    print("Successfully finished processing counts!")
+    print("Successfully finished processing counts!\n")
 
 def generateNgramCount(PG_Number,
                         text,

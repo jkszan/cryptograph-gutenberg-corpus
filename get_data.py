@@ -150,3 +150,4 @@ if __name__ == '__main__':
 
 # TODO: IMPORTANT - Alter this file to allow for stopping at a certain number of books downloaded, not the entire gutenburg corpus
 # TODO: Ideally, have it such that we download in order based on metadata (i.e. Only English books)
+# TODO: Rewrite argparse to include these params
