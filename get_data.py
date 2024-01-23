@@ -112,8 +112,9 @@ if __name__ == '__main__':
     # A very small portion of books are stored more than
     # once in PG's site. We keep the newest one, see
     # erase_duplicates_in_mirror docstring.
+    print("!")
     dups_list = list_duplicates_in_mirror(mirror_dir=args.mirror)
-
+    print("!!")
     # Populate raw from mirror
     # ------------------------
     # We populate 'raw_dir' hardlinking to
@@ -145,3 +146,8 @@ if __name__ == '__main__':
         pickle.dump(BS_dict, fp)
     with open("metadata/bookshelves_categories_dict.pkl", 'wb') as fp:
         pickle.dump(BS_num_to_category_str_dict, fp)
+
+
+# TODO: IMPORTANT - Alter this file to allow for stopping at a certain number of books downloaded, not the entire gutenburg corpus
+# TODO: Ideally, have it such that we download in order based on metadata (i.e. Only English books)
+# TODO: Rewrite argparse to include these params
