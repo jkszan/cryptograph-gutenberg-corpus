@@ -105,6 +105,9 @@ if __name__ == '__main__':
                "--exclude", "*",
                "aleph.gutenberg.org::gutenberg", args.mirror
                ]
+    # TODO: Below needs to also unzip + we must reflect directory differences
+    # TODO: changefor / test wget -w 2 -m --level=401 -H https://www.gutenberg.org/robot/harvest?filetypes[]=txt&langs[]=en
+    # Result should be a download of 40000~ books
     subprocess.call(sp_args)
 
     # Get rid of duplicates
@@ -112,9 +115,9 @@ if __name__ == '__main__':
     # A very small portion of books are stored more than
     # once in PG's site. We keep the newest one, see
     # erase_duplicates_in_mirror docstring.
-    print("!")
+
     dups_list = list_duplicates_in_mirror(mirror_dir=args.mirror)
-    print("!!")
+
     # Populate raw from mirror
     # ------------------------
     # We populate 'raw_dir' hardlinking to
